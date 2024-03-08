@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO processed_agent_data (road_state, x, y, z, latitude, longitude, timestamp)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)\n        RETURNING id as \"id!: ProcessedAgentId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: ProcessedAgentId",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Float8",
+        "Float8",
+        "Float8",
+        "Float8",
+        "Float8",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "db5a39ae041aea6b086501c22b125a24a03c45242ed523e0b929fc1d8976efab"
+}

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            NULL as \"id?: ProcessedAgentId\",\n            road_state,\n            x, y, z,\n            latitude as \"latitude!: Latitude\",\n            longitude as \"longitude!: Longitude\",\n            timestamp\n        FROM processed_agent_data\n        WHERE id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id?: ProcessedAgentId",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "road_state",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "x",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "y",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "z",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "latitude!: Latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "longitude!: Longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "timestamp",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d2383f6fc23dd1afc8f720ab46e4565c18737f74c483b4648bcf75c7fad4df6f"
+}

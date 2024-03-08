@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use color_eyre::Result;
-use iot_system::{domain::AggregatedData, reclone, setup_tracing};
+use iot_system::{domain::Agent, reclone, setup_tracing};
 use mqtt::{AsyncClient, ConnectOptionsBuilder};
 use paho_mqtt as mqtt;
 use tracing::instrument;
@@ -39,7 +39,7 @@ async fn publish(
     let datasource = datasource.start_reading_async().await?;
 
     let (data_reader_sender, mut data_reader_receiver) =
-        tokio::sync::mpsc::channel::<AggregatedData>(7);
+        tokio::sync::mpsc::channel::<Agent>(7);
 
     tokio::spawn(read_data(datasource, data_reader_sender));
 
@@ -61,11 +61,11 @@ async fn publish(
 #[instrument(skip(datasource, data_reader_sender))]
 async fn read_data(
     mut datasource: FileDatasource<state::ReadingAsync>,
-    data_reader_sender: tokio::sync::mpsc::Sender<AggregatedData>,
+    data_reader_sender: tokio::sync::mpsc::Sender<Agent>,
 ) {
     tracing::info!("Reading data from the datasource");
     loop {
-        let data: AggregatedData = match datasource.read().await {
+        let data: Agent = match datasource.read().await {
             Ok(data) => data,
             Err(err) => {
                 tracing::error!("Failed to read data from the datasource: {}", err);

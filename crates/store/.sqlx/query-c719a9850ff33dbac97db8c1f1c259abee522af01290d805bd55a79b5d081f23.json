@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM processed_agent_data\n        WHERE id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c719a9850ff33dbac97db8c1f1c259abee522af01290d805bd55a79b5d081f23"
+}

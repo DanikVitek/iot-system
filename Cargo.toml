@@ -11,10 +11,15 @@ opt-level = 3
 codegen-units = 1
 strip = true
 
+[features]
+default = []
+sqlx = ["dep:sqlx"]
+utoipa = ["dep:utoipa"]
+
 [workspace]
 resolver = "2"
 members = ["crates/*"]
-exclude = ["crates/edge", "crates/hub", "crates/store", "crates/ui"] # unexclude when ready
+exclude = ["crates/edge", "crates/hub", "crates/ui"] # unexclude when ready
 
 [workspace.dependencies]
 chrono = { version = "0.4.34", default-features = false, features = [
@@ -24,13 +29,23 @@ chrono = { version = "0.4.34", default-features = false, features = [
 color-eyre = "0.6.2"
 config = { version = "0.14.0", default-features = false, features = ["toml"] }
 paho-mqtt = "0.12.3"
+secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.197", features = ["derive", "rc"] }
 serde_json = "1.0.114"
+sqlx = { version = "0.7.3", features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "postgres",
+    "migrate",
+    "chrono",
+] }
+thiserror = "1.0.57"
 tokio = { version = "1.36.0", features = ["full"] }
 tokio-stream = { version = "0.1.14", features = ["fs"] }
 tracing = "0.1.40"
 tracing-appender = { version = "0.2.3", features = ["parking_lot"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+utoipa = { version = "4.2.0", features = ["openapi_extensions", "chrono", "non_strict_integers"] }
 
 [dependencies]
 chrono.workspace = true
@@ -38,3 +53,5 @@ serde.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 tracing-appender.workspace = true
+utoipa = { workspace = true, optional = true }
+sqlx = { workspace = true, optional = true }

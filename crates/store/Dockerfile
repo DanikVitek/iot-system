@@ -1,6 +1,6 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1.76.0 as chef
 WORKDIR /app
-RUN apt update && apt install lld clang openssl libssl-dev cmake -y
+RUN apt update && apt install lld clang -y
 
 FROM chef as planner
 COPY . .
@@ -20,8 +20,7 @@ RUN apt-get update -y \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app/target/release/agent agent
-COPY configuration configuration
-COPY data data
+COPY --from=builder /app/target/release/store store
+COPY migrations migrations
 ENV APP_ENVIRONMENT production
-ENTRYPOINT [ "./agent" ]
+ENTRYPOINT [ "./store" ]

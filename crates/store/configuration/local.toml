@@ -1,0 +1,6 @@
+[database]
+dbname = "iot-lab2"
+password = "postgrespw"
+
+[server]
+host = "127.0.0.1"

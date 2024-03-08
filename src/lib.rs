@@ -1,3 +1,5 @@
+extern crate core;
+
 use std::path::Path;
 
 use tracing_appender::non_blocking::WorkerGuard;
@@ -25,8 +27,8 @@ fn _setup_tracing(logs_dir: &Path, logs_file_name: &Path) -> Result<WorkerGuard,
         .with_env_filter(EnvFilter::from_default_env())
         .with_thread_ids(true)
         .finish()
-        .with(tracing_subscriber::fmt::layer().with(file_writer))
-        .with(tracing_subscriber::fmt::layer().with(std::io::stdout))
+        .with(tracing_subscriber::fmt::layer().with_writer(file_writer))
+        .with(tracing_subscriber::fmt::layer().with_writer(std::io::stdout))
         .try_init()?;
 
     Ok(guard)
@@ -74,9 +76,15 @@ impl<T> KtConvenience for T {}
 /// variables into closures, like `Rc` or `Arc`.
 #[macro_export]
 macro_rules! reclone {
+    ($v:ident $(,)?) => {
+        let $v = $v.clone();
+    };
+    (mut $v:ident $(,)?) => {
+        let mut $v = $v.clone();
+    };
     ($($v:ident),+ $(,)?) => {
         $(
             let $v = $v.clone();
         )+
-    }
+    };
 }

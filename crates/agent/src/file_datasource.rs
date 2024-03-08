@@ -6,7 +6,7 @@ use color_eyre::{
     Result,
 };
 use iot_system::{
-    domain::{Accelerometer, AggregatedData, Gps},
+    domain::{Accelerometer, Agent, Gps},
     KtConvenience,
 };
 use tokio::{fs::File as AsyncFile, io::BufReader as AsyncBufReader};
@@ -112,7 +112,7 @@ impl FileDatasource<state::New> {
 }
 
 impl FileDatasource<state::Reading> {
-    pub fn read(&mut self) -> Result<AggregatedData> {
+    pub fn read(&mut self) -> Result<Agent> {
         let Self {
             state:
                 state::Reading {
@@ -156,7 +156,7 @@ impl FileDatasource<state::Reading> {
 
             return match accelerometer.zip(gps) {
                 Some((accelerometer, gps)) => {
-                    Ok(AggregatedData::new(accelerometer, gps, Utc::now()))
+                    Ok(Agent::new(accelerometer, gps, Utc::now()))
                 }
                 None => {
                     tracing::debug!("Seeking to the beginning of the files");
@@ -188,7 +188,7 @@ impl FileDatasource<state::Reading> {
 }
 
 impl FileDatasource<state::ReadingAsync> {
-    pub async fn read(&mut self) -> Result<AggregatedData> {
+    pub async fn read(&mut self) -> Result<Agent> {
         let Self {
             state:
                 state::ReadingAsync {
@@ -223,7 +223,7 @@ impl FileDatasource<state::ReadingAsync> {
                 .transpose()?;
 
             return match accelerometer.zip(gps) {
-                Some((accelerometer, gps)) => Ok(AggregatedData::new(
+                Some((accelerometer, gps)) => Ok(Agent::new(
                     accelerometer.deserialize(
                         accelerometer_reader
                             .headers()

@@ -1,0 +1,7 @@
+/target
+/.vscode
+/.idea
+/configuration/production.toml
+/docker/store/logs/
+/report.json
+/report.html
