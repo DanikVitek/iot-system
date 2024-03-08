@@ -1,0 +1,4 @@
+[mqtt]
+broker_host = "localhost"
+broker_port = 1883
+topic = "agent"
