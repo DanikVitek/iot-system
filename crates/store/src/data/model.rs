@@ -1,17 +1,9 @@
 use std::fmt::{Debug, Display, Formatter};
 
 use chrono::{DateTime, Utc};
-pub use iot_system::domain::{Accelerometer, Agent, Gps, Latitude, Longitude};
+pub use iot_system::domain::{Accelerometer, Agent, Gps, Latitude, Longitude, ProcessedAgent};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToResponse, ToSchema};
-
-#[derive(Debug, Deserialize, Serialize, ToResponse, ToSchema)]
-pub struct ProcessedAgent {
-    #[serde(flatten)]
-    pub agent_data: Agent,
-    #[schema(max_length = 255, example = "NORMAL")]
-    pub road_state: String,
-}
 
 #[derive(
     Debug,

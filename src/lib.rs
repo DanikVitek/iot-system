@@ -1,5 +1,3 @@
-extern crate core;
-
 use std::path::Path;
 
 use tracing_appender::non_blocking::WorkerGuard;
@@ -9,6 +7,7 @@ use tracing_subscriber::{
     EnvFilter,
 };
 
+pub mod config;
 pub mod domain;
 
 #[inline(always)]

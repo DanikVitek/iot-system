@@ -5,7 +5,7 @@ use actix_web::{
     web, App, HttpServer,
 };
 use color_eyre::eyre::Result;
-use iot_system::{setup_tracing, KtConvenience};
+use iot_system::{config::TryRead, setup_tracing, KtConvenience};
 use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
 use utoipa::OpenApi;

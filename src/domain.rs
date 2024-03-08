@@ -1,11 +1,12 @@
 use core::fmt;
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Deserializer, Serialize};
+use derive_more::{Constructor, Into};
+use serde::{de, Deserialize, Deserializer, Serialize};
 #[cfg(feature = "utoipa")]
 use utoipa::{ToResponse, ToSchema};
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
 pub struct Accelerometer {
     x: f64,
@@ -13,7 +14,7 @@ pub struct Accelerometer {
     z: f64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
 pub struct Gps {
     #[cfg_attr(feature = "utoipa", schema(minimum = -90.0, maximum = 90.0, value_type = f64))]
@@ -22,19 +23,19 @@ pub struct Gps {
     longitude: Longitude,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Into)]
 #[repr(transparent)]
 #[serde(transparent)]
 #[cfg_attr(feature = "sqlx", derive(sqlx::Type), sqlx(transparent))]
 pub struct Latitude(f64);
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Into)]
 #[repr(transparent)]
 #[serde(transparent)]
 #[cfg_attr(feature = "sqlx", derive(sqlx::Type), sqlx(transparent))]
 pub struct Longitude(f64);
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
 pub struct Agent {
     accelerometer: Accelerometer,
@@ -42,11 +43,16 @@ pub struct Agent {
     timestamp: DateTime<Utc>,
 }
 
-impl Accelerometer {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z }
-    }
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
+pub struct ProcessedAgent {
+    #[serde(flatten)]
+    pub agent_data: Agent,
+    #[cfg_attr(feature = "utoipa", schema(max_length = 255, example = "NORMAL"))]
+    pub road_state: String,
+}
 
+impl Accelerometer {
     pub fn x(&self) -> f64 {
         self.x
     }
@@ -61,13 +67,6 @@ impl Accelerometer {
 }
 
 impl Gps {
-    pub fn new(latitude: Latitude, longitude: Longitude) -> Self {
-        Self {
-            latitude,
-            longitude,
-        }
-    }
-
     pub fn longitude(&self) -> Longitude {
         self.longitude
     }
@@ -78,14 +77,6 @@ impl Gps {
 }
 
 impl Agent {
-    pub fn new(accelerometer: Accelerometer, gps: Gps, timestamp: DateTime<Utc>) -> Self {
-        Self {
-            accelerometer,
-            gps,
-            timestamp,
-        }
-    }
-
     pub fn accelerometer(&self) -> Accelerometer {
         self.accelerometer
     }
@@ -104,7 +95,7 @@ impl<'de> Deserialize<'de> for Latitude {
     where
         D: Deserializer<'de>,
     {
-        deserialize::<_, f64, _>(deserializer)
+        try_from_deserialize::<_, _, f64>(deserializer)
     }
 }
 
@@ -113,33 +104,20 @@ impl<'de> Deserialize<'de> for Longitude {
     where
         D: Deserializer<'de>,
     {
-        deserialize::<_, f64, _>(deserializer)
+        try_from_deserialize::<_, _, f64>(deserializer)
     }
 }
 
-fn deserialize<'de, T, U, D>(deserializer: D) -> Result<T, D::Error>
+#[inline(always)]
+fn try_from_deserialize<'de, D, T, U>(deserializer: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
-    T: TryFrom<U>,
     U: Deserialize<'de>,
+    T: TryFrom<U>,
     <T as TryFrom<U>>::Error: fmt::Display,
 {
-    Deserialize::deserialize(deserializer)
-        .and_then(|v| T::try_from(v).map_err(serde::de::Error::custom))
+    U::deserialize(deserializer).and_then(|v| T::try_from(v).map_err(de::Error::custom))
 }
-
-impl From<Latitude> for f64 {
-    fn from(Latitude(value): Latitude) -> f64 {
-        value
-    }
-}
-
-impl From<Longitude> for f64 {
-    fn from(Longitude(value): Longitude) -> f64 {
-        value
-    }
-}
-
 impl TryFrom<f64> for Latitude {
     type Error = &'static str;
 

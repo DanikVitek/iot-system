@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use color_eyre::Result;
-use iot_system::{domain::Agent, reclone, setup_tracing};
+use iot_system::{config::TryRead, domain::Agent, reclone, setup_tracing};
 use mqtt::{AsyncClient, ConnectOptionsBuilder};
 use paho_mqtt as mqtt;
 use tracing::instrument;
@@ -38,8 +38,7 @@ async fn publish(
     let mut interval = tokio::time::interval(delay);
     let datasource = datasource.start_reading_async().await?;
 
-    let (data_reader_sender, mut data_reader_receiver) =
-        tokio::sync::mpsc::channel::<Agent>(7);
+    let (data_reader_sender, mut data_reader_receiver) = tokio::sync::mpsc::channel::<Agent>(7);
 
     tokio::spawn(read_data(datasource, data_reader_sender));
 
