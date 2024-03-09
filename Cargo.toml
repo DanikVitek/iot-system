@@ -16,6 +16,7 @@ default = []
 sqlx = ["dep:sqlx"]
 utoipa = ["dep:utoipa", "dep:serde_json"]
 redis = ["dep:redis"]
+tonic = ["dep:tonic", "dep:prost", "dep:tonic-build"]
 
 [workspace]
 resolver = "2"
@@ -33,6 +34,7 @@ config = { version = "0.14.0", default-features = false, features = ["toml"] }
 derive_more = "0.99.17"
 paho-mqtt = "0.12.3"
 prost = "0.12.3"
+prost-types = "0.12.3"
 redis = { version = "0.24.0", features = ["aio", "tokio-rustls-comp"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.197", features = ["derive", "rc"] }
@@ -48,6 +50,7 @@ thiserror = "1.0.57"
 tokio = { version = "1.36.0", features = ["full"] }
 tokio-stream = { version = "0.1.14", features = ["fs"] }
 tonic = "0.11.0"
+tonic-build = "0.11.0"
 tracing = "0.1.40"
 tracing-actix-web = "0.7.9"
 tracing-appender = { version = "0.2.3", features = ["parking_lot"] }
@@ -57,8 +60,10 @@ utoipa = { version = "4.2.0", features = ["openapi_extensions", "chrono", "non_s
 [dependencies]
 chrono.workspace = true
 config.workspace = true
+prost = { workspace = true, optional = true }
 serde.workspace = true
 thiserror.workspace = true
+tonic = { workspace = true, optional = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 tracing-appender.workspace = true
@@ -67,3 +72,6 @@ utoipa = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 sqlx = { workspace = true, optional = true }
 redis = { workspace = true, optional = true }
+
+[build-dependencies]
+tonic-build = { workspace = true, optional = true }

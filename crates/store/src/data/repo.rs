@@ -19,13 +19,13 @@ pub async fn insert_processed_agent_data_list(
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id as "id!: ProcessedAgentId"
             "#,
-            agent.road_state,
-            agent.agent_data.accelerometer().x(),
-            agent.agent_data.accelerometer().y(),
-            agent.agent_data.accelerometer().z(),
-            agent.agent_data.gps().latitude() as Latitude,
-            agent.agent_data.gps().longitude() as Longitude,
-            agent.agent_data.timestamp()
+            agent.road_state(),
+            agent.agent_data().accelerometer().x(),
+            agent.agent_data().accelerometer().y(),
+            agent.agent_data().accelerometer().z(),
+            agent.agent_data().gps().latitude() as Latitude,
+            agent.agent_data().gps().longitude() as Longitude,
+            agent.agent_data().timestamp()
         )
         .fetch_one(&mut *tx)
         .await?;
@@ -47,13 +47,13 @@ pub async fn insert_processed_agent_data(
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id as "id!: ProcessedAgentId"
         "#,
-        agent.road_state,
-        agent.agent_data.accelerometer().x(),
-        agent.agent_data.accelerometer().y(),
-        agent.agent_data.accelerometer().z(),
-        agent.agent_data.gps().latitude() as Latitude,
-        agent.agent_data.gps().longitude() as Longitude,
-        agent.agent_data.timestamp()
+        agent.road_state(),
+        agent.agent_data().accelerometer().x(),
+        agent.agent_data().accelerometer().y(),
+        agent.agent_data().accelerometer().z(),
+        agent.agent_data().gps().latitude() as Latitude,
+        agent.agent_data().gps().longitude() as Longitude,
+        agent.agent_data().timestamp()
     )
     .fetch_one(pool)
     .await?;
@@ -127,13 +127,13 @@ pub async fn update_processed_agent_data(
         SET road_state = $1, x = $2, y = $3, z = $4, latitude = $5, longitude = $6, timestamp = $7
         WHERE id = $8
         "#,
-        data.road_state,
-        data.agent_data.accelerometer().x(),
-        data.agent_data.accelerometer().y(),
-        data.agent_data.accelerometer().z(),
-        data.agent_data.gps().latitude() as Latitude,
-        data.agent_data.gps().longitude() as Longitude,
-        data.agent_data.timestamp(),
+        data.road_state(),
+        data.agent_data().accelerometer().x(),
+        data.agent_data().accelerometer().y(),
+        data.agent_data().accelerometer().z(),
+        data.agent_data().gps().latitude() as Latitude,
+        data.agent_data().gps().longitude() as Longitude,
+        data.agent_data().timestamp(),
         id as ProcessedAgentId
     )
     .execute(pool)

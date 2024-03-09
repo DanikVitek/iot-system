@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Display, Formatter};
 
 use chrono::{DateTime, Utc};
+use derive_more::Into;
 pub use iot_system::domain::{Accelerometer, Agent, Gps, Latitude, Longitude, ProcessedAgent};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToResponse, ToSchema};
@@ -18,13 +19,14 @@ use utoipa::{IntoParams, ToResponse, ToSchema};
     Serialize,
     sqlx::Type,
     IntoParams,
+    Into,
 )]
 #[repr(transparent)]
 #[serde(transparent)]
 #[sqlx(transparent)]
 #[into_params(names("id"))]
 /// ID of the processed agent to read, update, or delete.
-pub struct ProcessedAgentId(i32);
+pub struct ProcessedAgentId(i64);
 
 #[derive(Debug, Serialize, ToResponse, ToSchema)]
 pub struct ProcessedAgentWithId {
@@ -72,27 +74,27 @@ impl From<ProcessedAgentWithId> for ProcessedAgentDao {
     fn from(agent: ProcessedAgentWithId) -> Self {
         Self {
             id: agent.id,
-            road_state: agent.data.road_state,
-            x: agent.data.agent_data.accelerometer().x(),
-            y: agent.data.agent_data.accelerometer().y(),
-            z: agent.data.agent_data.accelerometer().z(),
-            latitude: agent.data.agent_data.gps().latitude(),
-            longitude: agent.data.agent_data.gps().longitude(),
-            timestamp: agent.data.agent_data.timestamp(),
+            road_state: agent.data.road_state().to_owned(),
+            x: agent.data.agent_data().accelerometer().x(),
+            y: agent.data.agent_data().accelerometer().y(),
+            z: agent.data.agent_data().accelerometer().z(),
+            latitude: agent.data.agent_data().gps().latitude(),
+            longitude: agent.data.agent_data().gps().longitude(),
+            timestamp: agent.data.agent_data().timestamp(),
         }
     }
 }
 
 impl From<ProcessedAgentDao> for ProcessedAgent {
     fn from(dao: ProcessedAgentDao) -> Self {
-        Self {
-            agent_data: Agent::new(
+        Self::new(
+            Agent::new(
                 Accelerometer::new(dao.x, dao.y, dao.z),
                 Gps::new(dao.latitude, dao.longitude),
                 dao.timestamp,
             ),
-            road_state: dao.road_state,
-        }
+            dao.road_state,
+        )
     }
 }
 

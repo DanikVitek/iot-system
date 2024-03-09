@@ -1,4 +1,4 @@
-use std::net::{Ipv4Addr, SocketAddr, ToSocketAddrs};
+use std::net::{IpAddr, SocketAddr, ToSocketAddrs};
 
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
@@ -7,7 +7,8 @@ use sqlx::postgres::PgConnectOptions;
 #[derive(Debug, Deserialize)]
 pub struct Configuration {
     database: Database,
-    server: Server,
+    http_server: Server,
+    grpc_server: Server,
 }
 
 #[derive(Debug, Deserialize)]
@@ -22,7 +23,7 @@ pub struct Database {
 
 #[derive(Debug, Clone, Copy, Deserialize)]
 pub struct Server {
-    host: Ipv4Addr,
+    host: IpAddr,
     port: u16,
 }
 
@@ -31,8 +32,12 @@ impl Configuration {
         &self.database
     }
 
-    pub fn server(&self) -> Server {
-        self.server
+    pub fn http_server(&self) -> Server {
+        self.http_server
+    }
+
+    pub fn grpc_server(&self) -> Server {
+        self.grpc_server
     }
 }
 
@@ -51,7 +56,7 @@ impl Database {
 
 impl From<Server> for SocketAddr {
     fn from(value: Server) -> Self {
-        SocketAddr::new(value.host.into(), value.port)
+        SocketAddr::new(value.host, value.port)
     }
 }
 

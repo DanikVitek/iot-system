@@ -10,6 +10,11 @@ use tracing_subscriber::{
 pub mod config;
 pub mod domain;
 
+#[cfg(feature = "tonic")]
+pub mod proto {
+    tonic::include_proto!("iot_system");
+}
+
 #[inline(always)]
 pub fn setup_tracing(
     logs_dir: impl AsRef<Path>,

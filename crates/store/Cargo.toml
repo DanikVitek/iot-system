@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-iot-system = { path = "../..", features = ["sqlx", "utoipa"] }
+iot-system = { path = "../..", features = ["sqlx", "utoipa", "tonic"] }
 actix-web.workspace = true
 actix-ws = "0.2.5"
 chrono.workspace = true
 color-eyre.workspace = true
 config.workspace = true
+derive_more = { workspace = true, features = ["constructor"] }
 mime = "0.3.17"
 secrecy.workspace = true
 serde.workspace = true

@@ -2,5 +2,8 @@
 dbname = "iot-lab2"
 password = "postgrespw"
 
-[server]
+[http_server]
 host = "127.0.0.1"
+
+[grpc_server]
+host = "[::1]"

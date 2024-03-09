@@ -6,6 +6,8 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 #[cfg(feature = "utoipa")]
 use utoipa::{ToResponse, ToSchema};
 
+use crate::proto;
+
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
 pub struct Accelerometer {
@@ -35,7 +37,7 @@ pub struct Latitude(f64);
 #[cfg_attr(feature = "sqlx", derive(sqlx::Type), sqlx(transparent))]
 pub struct Longitude(f64);
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
 pub struct Agent {
     accelerometer: Accelerometer,
@@ -43,13 +45,22 @@ pub struct Agent {
     timestamp: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Constructor)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
 pub struct ProcessedAgent {
     #[serde(flatten)]
-    pub agent_data: Agent,
+    agent_data: Agent,
     #[cfg_attr(feature = "utoipa", schema(max_length = 255, example = "NORMAL"))]
-    pub road_state: String,
+    road_state: String,
+}
+
+impl ProcessedAgent {
+    pub fn agent_data(&self) -> &Agent {
+        &self.agent_data
+    }
+    pub fn road_state(&self) -> &str {
+        &self.road_state
+    }
 }
 
 impl Accelerometer {
@@ -119,25 +130,166 @@ where
     U::deserialize(deserializer).and_then(|v| T::try_from(v).map_err(de::Error::custom))
 }
 impl TryFrom<f64> for Latitude {
-    type Error = &'static str;
+    type Error = InvalidLatitudeError;
 
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         if (-90.0..=90.0).contains(&value) {
             Ok(Latitude(value))
         } else {
-            Err("latitude must be in range -90..90")
+            Err(InvalidLatitudeError)
         }
     }
 }
 
+#[derive(Debug, Clone, Copy, thiserror::Error)]
+#[error("latitude must be in range -90..90")]
+pub struct InvalidLatitudeError;
+
 impl TryFrom<f64> for Longitude {
-    type Error = &'static str;
+    type Error = InvalidLongitudeError;
 
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         if (-180.0..=180.0).contains(&value) {
             Ok(Longitude(value))
         } else {
-            Err("longitude must be in range -180..180")
+            Err(InvalidLongitudeError)
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, thiserror::Error)]
+#[error("longitude must be in range -180..180")]
+pub struct InvalidLongitudeError;
+
+#[cfg(feature = "tonic")]
+impl From<proto::AccelerometerData> for Accelerometer {
+    fn from(data: proto::AccelerometerData) -> Self {
+        Self::new(data.x, data.y, data.z)
+    }
+}
+
+#[cfg(feature = "tonic")]
+impl TryFrom<proto::GpsData> for Gps {
+    type Error = InvalidGpsDataError;
+
+    fn try_from(value: proto::GpsData) -> Result<Self, Self::Error> {
+        match (
+            Latitude::try_from(value.latitude),
+            Longitude::try_from(value.longitude),
+        ) {
+            (Ok(latitude), Ok(longitude)) => Ok(Self::new(latitude, longitude)),
+            (Err(err), Ok(_)) => Err(err.into()),
+            (Ok(_), Err(err)) => Err(err.into()),
+            (Err(_), Err(_)) => Err(InvalidGpsDataError::Both(
+                InvalidLatitudeError,
+                InvalidLongitudeError,
+            )),
+        }
+    }
+}
+
+#[cfg(feature = "tonic")]
+#[derive(Debug, thiserror::Error)]
+pub enum InvalidGpsDataError {
+    #[error("Invalid latitude: {0}")]
+    InvalidLatitude(
+        #[from]
+        #[source]
+        InvalidLatitudeError,
+    ),
+    #[error("Invalid longitude: {0}")]
+    InvalidLongitude(
+        #[from]
+        #[source]
+        InvalidLongitudeError,
+    ),
+    #[error("Invalid latitude and longitude: {0}, {1}")]
+    Both(InvalidLatitudeError, InvalidLongitudeError),
+}
+
+#[cfg(feature = "tonic")]
+impl TryFrom<proto::AgentData> for Agent {
+    type Error = InvalidAgentDataError;
+
+    fn try_from(value: proto::AgentData) -> Result<Self, Self::Error> {
+        let accelerometer = value
+            .accelerometer
+            .ok_or(InvalidAgentDataError::MissingAccelerometer)?
+            .into();
+        let gps = value
+            .gps
+            .ok_or(InvalidAgentDataError::MissingGps)?
+            .try_into()?;
+        let timestamp = value
+            .timestamp
+            .ok_or(InvalidAgentDataError::MissingTimestamp)?
+            .try_into()?;
+        Ok(Self::new(accelerometer, gps, timestamp))
+    }
+}
+
+#[cfg(feature = "tonic")]
+#[derive(Debug, thiserror::Error)]
+pub enum InvalidAgentDataError {
+    #[error("Missing GPS data")]
+    MissingGps,
+    #[error("Missing accelerometer data")]
+    MissingAccelerometer,
+    #[error("Missing timestamp")]
+    MissingTimestamp,
+    #[error("Invalid timestamp: {0}")]
+    InvalidTimestamp(
+        #[from]
+        #[source]
+        InvalidDateTimeError,
+    ),
+    #[error("Invalid GPS data: {0}")]
+    InvalidGpsData(
+        #[from]
+        #[source]
+        InvalidGpsDataError,
+    ),
+}
+
+#[cfg(feature = "tonic")]
+impl TryFrom<proto::ProcessedAgentData> for ProcessedAgent {
+    type Error = InvalidProcessedAgentDataError;
+
+    fn try_from(value: proto::ProcessedAgentData) -> Result<Self, Self::Error> {
+        let agent_data = value
+            .agent
+            .ok_or(InvalidProcessedAgentDataError::MissingAgentData)?;
+        let agent_data = Agent::try_from(agent_data)?;
+        // let road_state = value.road_state.ok_or(InvalidProcessedAgentDataError::InvalidRoadState)?;
+        Ok(Self::new(agent_data, value.road_state))
+    }
+}
+
+#[cfg(feature = "tonic")]
+#[derive(Debug, thiserror::Error)]
+pub enum InvalidProcessedAgentDataError {
+    #[error("Missing agent data")]
+    MissingAgentData,
+    #[error("Invalid agent data: {0}")]
+    InvalidAgentData(
+        #[from]
+        #[source]
+        InvalidAgentDataError,
+    ),
+    // #[error("Invalid road state")]
+    // InvalidRoadState,
+}
+
+#[cfg(feature = "tonic")]
+impl TryFrom<proto::DateTimeUtc> for DateTime<Utc> {
+    type Error = InvalidDateTimeError;
+
+    fn try_from(value: proto::DateTimeUtc) -> Result<Self, Self::Error> {
+        DateTime::from_timestamp(value.seconds, value.nanos).ok_or(InvalidDateTimeError)
+    }
+}
+
+#[cfg(feature = "tonic")]
+#[derive(Debug, thiserror::Error)]
+#[error("Out-of-range number of seconds and/or invalid nanosecond")]
+pub struct InvalidDateTimeError;

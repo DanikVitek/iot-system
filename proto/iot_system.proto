@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package iot_system;
+
+service Store {
+  rpc CreateProcessedAgentData(Input) returns (ProcessedAgentDataID);
+}
+
+message Input {
+  repeated ProcessedAgentData data = 1;
+}
+
+message ProcessedAgentDataID {
+  repeated int64 ids = 1;
+}
+
+message ProcessedAgentData {
+  AgentData agent = 1;
+  string road_state = 2;
+}
+
+message AgentData {
+  AccelerometerData accelerometer = 1;
+  GpsData gps = 2;
+  DateTimeUtc timestamp = 3;
+}
+
+message AccelerometerData {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message GpsData {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message DateTimeUtc {
+  sfixed64 seconds = 1;
+  fixed32 nanos = 2;
+}
