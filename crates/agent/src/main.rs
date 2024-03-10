@@ -37,7 +37,7 @@ async fn publish(
     delay: Duration,
 ) -> Result<()> {
     let mut interval = tokio::time::interval(delay);
-    let datasource = datasource.start_reading_async().await?;
+    let datasource = datasource.start_reading().await?;
 
     let (data_reader_sender, mut data_reader_receiver) = tokio::sync::mpsc::channel::<Agent>(7);
 

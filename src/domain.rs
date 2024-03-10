@@ -294,3 +294,56 @@ impl TryFrom<proto::DateTimeUtc> for DateTime<Utc> {
 #[derive(Debug, thiserror::Error)]
 #[error("Out-of-range number of seconds and/or invalid nanosecond")]
 pub struct InvalidDateTimeError;
+
+#[cfg(feature = "tonic")]
+impl From<ProcessedAgent> for proto::ProcessedAgentData {
+    fn from(value: ProcessedAgent) -> Self {
+        Self {
+            agent: Some(value.agent_data.into()),
+            road_state: value.road_state,
+        }
+    }
+}
+
+#[cfg(feature = "tonic")]
+impl From<Agent> for proto::AgentData {
+    fn from(value: Agent) -> Self {
+        Self {
+            accelerometer: Some(value.accelerometer.into()),
+            gps: Some(value.gps.into()),
+            timestamp: Some(value.timestamp.into()),
+        }
+    }
+}
+
+#[cfg(feature = "tonic")]
+impl From<Accelerometer> for proto::AccelerometerData {
+    fn from(Accelerometer { x, y, z }: Accelerometer) -> Self {
+        Self { x, y, z }
+    }
+}
+
+#[cfg(feature = "tonic")]
+impl From<Gps> for proto::GpsData {
+    fn from(
+        Gps {
+            latitude,
+            longitude,
+        }: Gps,
+    ) -> Self {
+        Self {
+            latitude: latitude.into(),
+            longitude: longitude.into(),
+        }
+    }
+}
+
+#[cfg(feature = "tonic")]
+impl From<DateTime<Utc>> for proto::DateTimeUtc {
+    fn from(value: DateTime<Utc>) -> Self {
+        Self {
+            seconds: value.timestamp(),
+            nanos: value.timestamp_subsec_nanos(),
+        }
+    }
+}
