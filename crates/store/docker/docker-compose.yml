@@ -33,8 +33,8 @@ services:
   store:
     container_name: store
     build:
-      context: ../..
-      dockerfile: store/Dockerfile
+      context: ../../..
+      dockerfile: crates/store/Dockerfile
     depends_on:
       - postgres_db
     restart: always

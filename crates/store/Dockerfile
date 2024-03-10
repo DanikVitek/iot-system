@@ -5,7 +5,7 @@ RUN apt update && apt upgrade -y &&\
 
 FROM chef as planner
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json --bin store
+RUN cargo chef prepare --recipe-path recipe.json --bin crates/store
 
 FROM chef as builder
 COPY --from=planner /app/recipe.json recipe.json
@@ -22,6 +22,6 @@ RUN apt-get update -y &&\
     apt-get clean -y &&\
     rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/target/release/store store
-COPY store/migrations migrations
+COPY crates/store/migrations migrations
 ENV APP_ENVIRONMENT production
 ENTRYPOINT [ "./store" ]

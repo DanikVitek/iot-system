@@ -5,7 +5,7 @@ RUN apt update && apt upgrade -y &&\
 
 FROM chef as planner
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json --bin agent
+RUN cargo chef prepare --recipe-path recipe.json --bin crates/agent
 
 FROM chef as builder
 COPY --from=planner /app/recipe.json recipe.json
@@ -21,6 +21,6 @@ RUN apt-get update -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/target/release/agent agent
-COPY agent/data data
+COPY crates/agent/data data
 ENV APP_ENVIRONMENT production
 ENTRYPOINT [ "./agent" ]

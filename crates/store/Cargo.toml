@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-iot-system = { path = "..", features = ["sqlx", "utoipa", "tonic"] }
+iot-system = { path = "../..", features = ["sqlx", "utoipa", "tonic"] }
 actix-web.workspace = true
 actix-ws = "0.2.5"
 chrono.workspace = true

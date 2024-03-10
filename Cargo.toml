@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["agent", "hub", "store"]
-#exclude = ["crates/edge", "crates/ui"] # unexclude when ready
+members = ["crates/*"]
+exclude = ["crates/edge", "crates/ui"] # unexclude when ready
 
 [workspace.package]
 version = "0.1.0"
