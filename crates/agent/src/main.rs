@@ -28,6 +28,7 @@ async fn main() -> Result<()> {
     result.map_err(Into::into)
 }
 
+#[cfg(all(feature = "async-read", not(feature = "sync-read")))]
 #[instrument(skip(client, datasource))]
 async fn publish(
     client: AsyncClient,
@@ -57,9 +58,59 @@ async fn publish(
     Ok(())
 }
 
+#[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
+#[instrument(skip(client, datasource))]
+async fn publish(
+    client: AsyncClient,
+    topic: &str,
+    datasource: FileDatasource<state::New>,
+    delay: Duration,
+) -> Result<()> {
+    let mut interval = tokio::time::interval(delay);
+    let mut datasource = datasource.start_reading()?;
+
+    tracing::info!("Reading data from the datasource");
+    loop {
+        interval.tick().await;
+        let data: Agent = match datasource.read() {
+            Ok(data) => data,
+            Err(err) => {
+                tracing::error!("Failed to read data from the datasource: {}", err);
+                continue;
+            }
+        };
+        tracing::debug!("Sending data to the broker: {data:#?}");
+        let message = mqtt::Message::new(topic, serde_json::to_vec(&data)?, 0);
+        if let Err(err) = client.publish(message).await {
+            tracing::error!("Failed to send message to topic {topic}: {err}")
+        };
+        tracing::info!("Data sent to the broker");
+    }
+}
+
+#[cfg(all(not(feature = "async-read"), not(feature = "sync-read")))]
+async fn publish(
+    _client: AsyncClient,
+    _topic: &str,
+    _datasource: FileDatasource<state::New>,
+    _delay: Duration,
+) -> Result<()> {
+    panic!("You must enable either the `async-read` or `sync-read` feature to use the `publish` function.")
+}
+
+#[cfg(all(feature = "async-read", feature = "sync-read"))]
+async fn publish(
+    _client: AsyncClient,
+    _topic: &str,
+    _datasource: FileDatasource<state::New>,
+    _delay: Duration,
+) -> Result<()> {
+    panic!("You must enable only one of the `async-read` or `sync-read` features to use the `publish` function.")
+}
+
 #[instrument(skip(datasource, data_reader_sender))]
 async fn read_data(
-    mut datasource: FileDatasource<state::ReadingAsync>,
+    mut datasource: FileDatasource<state::Reading>,
     data_reader_sender: tokio::sync::mpsc::Sender<Agent>,
 ) {
     tracing::info!("Reading data from the datasource");

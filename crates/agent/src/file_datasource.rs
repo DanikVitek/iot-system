@@ -9,7 +9,9 @@ use iot_system::{
     domain::{Accelerometer, Agent, Gps},
     KtConvenience,
 };
+#[cfg(all(feature = "async-read", not(feature = "sync-read")))]
 use tokio::{fs::File as AsyncFile, io::BufReader as AsyncBufReader};
+#[cfg(all(feature = "async-read", not(feature = "sync-read")))]
 use tokio_stream::StreamExt;
 
 pub struct FileDatasource<State> {
@@ -20,6 +22,7 @@ pub struct FileDatasource<State> {
 
 /// States of the file data source state machine
 pub mod state {
+    #[cfg(all(feature = "async-read", not(feature = "sync-read")))]
     use csv_async::AsyncReader;
 
     use super::*;
@@ -27,6 +30,7 @@ pub mod state {
     /// Initial state of the file data source
     pub struct New;
 
+    #[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
     /// Sync reading state of the file data source
     pub struct Reading {
         pub accelerometer_reader: csv::Reader<BufReader<File>>,
@@ -35,8 +39,9 @@ pub mod state {
         pub gps_reader_start: Option<csv::Position>,
     }
 
+    #[cfg(all(feature = "async-read", not(feature = "sync-read")))]
     /// Async reading state of the file data source
-    pub struct ReadingAsync {
+    pub struct Reading {
         pub accelerometer_reader: AsyncReader<AsyncBufReader<AsyncFile>>,
         pub gps_reader: AsyncReader<AsyncBufReader<AsyncFile>>,
         pub accelerometer_reader_start: bool,
@@ -62,6 +67,7 @@ impl FileDatasource<state::New> {
         }
     }
 
+    #[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
     pub fn start_reading(self) -> Result<FileDatasource<state::Reading>> {
         let Self {
             accelerometer_filename,
@@ -85,7 +91,8 @@ impl FileDatasource<state::New> {
         })
     }
 
-    pub async fn start_reading_async(self) -> Result<FileDatasource<state::ReadingAsync>> {
+    #[cfg(all(feature = "async-read", not(feature = "sync-read")))]
+    pub async fn start_reading(self) -> Result<FileDatasource<state::Reading>> {
         let Self {
             accelerometer_filename,
             gps_filename,
@@ -99,7 +106,7 @@ impl FileDatasource<state::New> {
             AsyncFile::open(gps_filename.as_ref()).await?,
         ));
         Ok(FileDatasource {
-            state: state::ReadingAsync {
+            state: state::Reading {
                 accelerometer_reader,
                 gps_reader,
                 accelerometer_reader_start: false,
@@ -111,6 +118,7 @@ impl FileDatasource<state::New> {
     }
 }
 
+#[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
 impl FileDatasource<state::Reading> {
     pub fn read(&mut self) -> Result<Agent> {
         let Self {
@@ -187,11 +195,12 @@ impl FileDatasource<state::Reading> {
     }
 }
 
-impl FileDatasource<state::ReadingAsync> {
+#[cfg(all(feature = "async-read", not(feature = "sync-read")))]
+impl FileDatasource<state::Reading> {
     pub async fn read(&mut self) -> Result<Agent> {
         let Self {
             state:
-                state::ReadingAsync {
+                state::Reading {
                     accelerometer_reader,
                     gps_reader,
                     accelerometer_reader_start,
