@@ -13,6 +13,9 @@ pub mod domain;
 #[cfg(feature = "tonic")]
 pub mod proto {
     tonic::include_proto!("iot_system");
+
+    pub const FILE_DESCRIPTOR_SET: &[u8] =
+        tonic::include_file_descriptor_set!("iot_system_descriptor");
 }
 
 #[inline(always)]

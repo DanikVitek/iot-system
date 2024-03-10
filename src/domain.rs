@@ -6,6 +6,7 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 #[cfg(feature = "utoipa")]
 use utoipa::{ToResponse, ToSchema};
 
+#[cfg(feature = "tonic")]
 use crate::proto;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, Constructor)]

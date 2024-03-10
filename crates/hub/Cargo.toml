@@ -10,7 +10,6 @@ iot-system = { path = "../..", features = ["redis", "tonic"] }
 actix-web.workspace = true
 chrono.workspace = true
 color-eyre.workspace = true
-config.workspace = true
 paho-mqtt.workspace = true
 redis = { workspace = true, features = ["json"] }
 secrecy.workspace = true

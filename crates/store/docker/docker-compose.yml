@@ -32,7 +32,9 @@ services:
 
   store:
     container_name: store
-    build: ..
+    build:
+      context: ../../..
+      dockerfile: crates/store/Dockerfile
     depends_on:
       - postgres_db
     restart: always
@@ -44,6 +46,7 @@ services:
       - ../configuration:/app/configuration
     ports:
       - "8080:8080"
+      - "50051:50051"
     networks:
       db_network:
 

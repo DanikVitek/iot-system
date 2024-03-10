@@ -16,11 +16,14 @@ services:
 
   fake_agent:
     container_name: agent
-    build: ..
+    build:
+      context: ../../..
+      dockerfile: crates/agent/Dockerfile
     depends_on:
       - mqtt
     volumes:
       - ./agent/log:/app/log
+      - ../configuration:/app/configuration
     environment:
       RUST_BACKTRACE: 1
       RUST_LOG: DEBUG

@@ -39,6 +39,9 @@ async fn main() -> Result<()> {
     let subs = Arc::new(Subscribers::new());
 
     let store_service = grpc::StoreService::new(subs.clone(), pool.clone());
+    let reflection_service = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
+        .build()?;
 
     let openapi = ApiDocs::openapi();
 
@@ -46,6 +49,7 @@ async fn main() -> Result<()> {
         let address = config.grpc_server().into();
         async move {
             tonic::transport::Server::builder()
+                .add_service(reflection_service)
                 .add_service(proto::store_server::StoreServer::new(store_service))
                 .serve(address)
                 .await?;
