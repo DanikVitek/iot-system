@@ -11,8 +11,7 @@ pub trait TryRead<'de>: Deserialize<'de> {
         let config = config::Config::builder()
             .add_source(config::File::from(config_dir.join("base")).required(true))
             .add_source({
-                let environment: Environment = std::env::var("APP_ENVIRONMENT")
-                    .map_err(EnvironmentError::VarError)?
+                let environment: Environment = std::env::var("APP_ENVIRONMENT")?
                     .parse()
                     .map_err(EnvironmentError::ParseError)?;
                 config::File::from(config_dir.join(environment.as_str())).required(true)
@@ -51,6 +50,12 @@ pub enum EnvironmentError {
     ),
     #[error("{0}")]
     ParseError(String),
+}
+
+impl From<std::env::VarError> for ConfigurationError {
+    fn from(err: std::env::VarError) -> Self {
+        Self::Environment(EnvironmentError::VarError(err))
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["crates/*"]
-exclude = ["crates/edge", "crates/ui"] # unexclude when ready
+members = ["agent", "hub", "store"]
+#exclude = ["crates/edge", "crates/ui"] # unexclude when ready
 
 [workspace.package]
 version = "0.1.0"
@@ -25,7 +25,7 @@ default = []
 sqlx = ["dep:sqlx"]
 utoipa = ["dep:utoipa", "dep:serde_json"]
 redis = ["dep:redis"]
-tonic = ["dep:tonic", "dep:prost", "dep:tonic-build"]
+tonic = ["dep:tonic", "dep:prost"]
 
 [workspace.dependencies]
 actix-web = "4.5.1"
@@ -54,7 +54,6 @@ thiserror = "1.0.57"
 tokio = { version = "1.36.0", features = ["full"] }
 tokio-stream = { version = "0.1.14", features = ["fs"] }
 tonic = "0.11.0"
-tonic-build = "0.11.0"
 tonic-reflection = "0.11.0"
 tracing = "0.1.40"
 tracing-actix-web = "0.7.9"
@@ -79,4 +78,4 @@ sqlx = { workspace = true, optional = true }
 redis = { workspace = true, optional = true }
 
 [build-dependencies]
-tonic-build = { workspace = true, optional = true }
+tonic-build = "0.11.0"

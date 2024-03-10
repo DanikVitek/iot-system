@@ -6,4 +6,4 @@ password = "postgrespw"
 host = "127.0.0.1"
 
 [grpc_server]
-host = "[::1]"
+host = "::1"
