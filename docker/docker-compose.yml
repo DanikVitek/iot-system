@@ -1,0 +1,118 @@
+version: "3.9"
+name: "road_vision"
+services:
+  mqtt:
+    image: eclipse-mosquitto
+    container_name: mqtt
+    volumes:
+      - ./mosquitto:/mosquitto
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      mqtt_network:
+
+  fake_agent:
+    container_name: agent
+    build:
+      context: ..
+      dockerfile: crates/agent/Dockerfile
+    depends_on:
+      - mqtt
+    volumes:
+      - ./agent/log:/app/log
+      - ../crates/agent/configuration:/app/configuration
+    environment:
+      RUST_BACKTRACE: full
+      RUST_LOG: DEBUG
+    networks:
+      mqtt_network:
+
+  postgres_db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      db_network:
+
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      db_network:
+
+  store:
+    container_name: store
+    build:
+      context: ..
+      dockerfile: crates/store/Dockerfile
+    depends_on:
+      - postgres_db
+    restart: always
+    environment:
+      RUST_BACKTRACE: 1
+      RUST_LOG: DEBUG
+    volumes:
+      - ./store/logs:/app/logs
+      - ../crates/store/configuration:/app/configuration
+    ports:
+      - "8080:8080" # REST
+      - "50051:50051" # gRPC
+    networks:
+      db_network:
+      hub_store:
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      hub_redis:
+
+  hub:
+    container_name: hub
+    build:
+      context: ..
+      dockerfile: crates/hub/Dockerfile
+    depends_on:
+      - mqtt
+      - redis
+      - store
+    ports:
+      - "9000:8000"
+    volumes:
+      - ./hub/logs:/app/logs
+      - ../crates/hub/configuration:/app/configuration
+    networks:
+      mqtt_network:
+      hub_store:
+      hub_redis:
+
+networks:
+  mqtt_network:
+  db_network:
+  hub_store:
+  hub_redis:
+
+volumes:
+  postgres_data:
+  pgadmin_data:

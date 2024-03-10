@@ -2,3 +2,8 @@
 /.idea
 /.vscode
 /.env
+/docker/mosquitto/data
+/docker/mosquitto/log
+/docker/agent/logs
+/docker/store/logs
+/docker/hub/logs

@@ -17,7 +17,7 @@ mod file_datasource;
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
-    let _guard = setup_tracing("./log", "lab1.log")?;
+    let _guard = setup_tracing("./logs", "lab1.log")?;
 
     let config = Configuration::try_read()?;
     let client = connect_mqtt(config.mqtt().to_owned()).await?;

@@ -5,7 +5,7 @@ RUN apt update && apt upgrade -y &&\
 
 FROM chef as planner
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json --bin crates/store
+RUN cargo chef prepare --recipe-path recipe.json --bin store
 
 FROM chef as builder
 COPY --from=planner /app/recipe.json recipe.json
