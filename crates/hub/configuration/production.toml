@@ -8,4 +8,4 @@ host = "redis"
 
 [mqtt]
 host = "mqtt"
-topic = "agent_data_topic"
+topic = "processed_agent_data_topic"

@@ -14,7 +14,7 @@ services:
     networks:
       mqtt_network:
 
-  fake_agent:
+  agent:
     container_name: agent
     build:
       context: ..
@@ -22,7 +22,7 @@ services:
     depends_on:
       - mqtt
     volumes:
-      - ./agent/log:/app/log
+      - ./agent/logs:/app/logs
       - ../crates/agent/configuration:/app/configuration
     environment:
       RUST_BACKTRACE: full
@@ -97,8 +97,8 @@ services:
       - mqtt
       - redis
       - store
-    ports:
-      - "9000:8000"
+#    ports:
+#      - "9000:8000"
     volumes:
       - ./hub/logs:/app/logs
       - ../crates/hub/configuration:/app/configuration
