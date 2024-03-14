@@ -4,5 +4,5 @@ port = 50051
 [hub_mqtt]
 port = 1883
 
-[mqtt]
+[agent_mqtt]
 port = 1883

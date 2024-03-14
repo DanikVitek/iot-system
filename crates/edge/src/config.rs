@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Configuration {
-    pub mqtt: Mqtt,
+    pub agent_mqtt: Mqtt,
     pub hub_mqtt: Mqtt,
     pub hub_grpc: Server,
 }

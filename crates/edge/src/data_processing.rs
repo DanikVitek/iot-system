@@ -1,6 +1,6 @@
 use iot_system::domain::{Agent, ProcessedAgent, RoadState};
 
-pub fn process_agent_data(current_data: Agent, prev_data: Option<Agent>) -> ProcessedAgent {
+pub fn process_agent_data(current_data: Agent, prev_data: Option<&Agent>) -> ProcessedAgent {
     let road_state = 'b: {
         let Some(prev_data) = prev_data else {
             break 'b RoadState::default();

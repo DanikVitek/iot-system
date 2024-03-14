@@ -7,7 +7,7 @@ use tracing::instrument;
 
 use crate::adapter::hub::HubGateway;
 
-struct HubMqttAdapter {
+pub struct HubMqttAdapter {
     client: mqtt::AsyncClient,
     topic: Arc<str>,
 }

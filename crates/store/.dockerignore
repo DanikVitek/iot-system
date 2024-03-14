@@ -1,7 +1,2 @@
-/.vscode
-/.idea
-/target
-/.git
-/docker
 /configuration/local.toml
 .gitignore
