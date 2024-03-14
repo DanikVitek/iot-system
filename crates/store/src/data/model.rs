@@ -2,10 +2,10 @@ use std::fmt::{Debug, Display, Formatter};
 
 use chrono::{DateTime, Utc};
 use derive_more::Into;
+use iot_system::domain::RoadState;
 pub use iot_system::domain::{Accelerometer, Agent, Gps, Latitude, Longitude, ProcessedAgent};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToResponse, ToSchema};
-use iot_system::domain::RoadState;
 
 #[derive(
     Debug,
