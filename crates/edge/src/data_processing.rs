@@ -9,12 +9,14 @@ pub fn process_agent_data(current_data: Agent, prev_data: Option<&Agent>) -> Pro
         let dt = current_data
             .timestamp()
             .signed_duration_since(prev_data.timestamp())
-            .num_seconds() as f64; // seconds
+            .num_milliseconds() as f64
+            / 1000.0; // seconds
         let a1_z = prev_data.accelerometer().z(); // mm/s^2
         let a2_z = current_data.accelerometer().z(); // mm/s^2
-        let dv_z = (a1_z + a2_z) / 2.0 * dt; // mm/s
-        tracing::debug!("dv_z: {}", dv_z);
-        if dv_z.abs() > 100.0 {
+        let da_z = a2_z - a1_z; // mm/s^2
+        let da_z_dt = da_z / dt; // mm/s^3
+        tracing::debug!("da_z_dt: {}", da_z_dt);
+        if da_z_dt.abs() > 1000.0 {
             RoadState::Rough
         } else {
             RoadState::Smooth
