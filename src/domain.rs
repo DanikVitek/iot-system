@@ -51,16 +51,25 @@ pub struct Agent {
 pub struct ProcessedAgent {
     #[serde(flatten)]
     agent_data: Agent,
-    #[cfg_attr(feature = "utoipa", schema(max_length = 255, example = "NORMAL"))]
-    road_state: String,
+    road_state: RoadState,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
+#[serde(rename_all = "UPPERCASE")]
+pub enum RoadState {
+    #[default]
+    Smooth,
+    Rough,
 }
 
 impl ProcessedAgent {
     pub fn agent_data(&self) -> &Agent {
         &self.agent_data
     }
-    pub fn road_state(&self) -> &str {
-        &self.road_state
+    pub fn road_state(&self) -> RoadState {
+        self.road_state
     }
 }
 
@@ -253,16 +262,36 @@ pub enum InvalidAgentDataError {
 }
 
 #[cfg(feature = "tonic")]
+impl From<proto::RoadState> for RoadState {
+    fn from(value: proto::RoadState) -> Self {
+        match value {
+            proto::RoadState::Smooth => Self::Smooth,
+            proto::RoadState::Rough => Self::Rough,
+        }
+    }
+}
+
+#[cfg(feature = "tonic")]
+impl From<RoadState> for proto::RoadState {
+    fn from(value: RoadState) -> Self {
+        match value {
+            RoadState::Smooth => Self::Smooth,
+            RoadState::Rough => Self::Rough,
+        }
+    }
+}
+
+#[cfg(feature = "tonic")]
 impl TryFrom<proto::ProcessedAgentData> for ProcessedAgent {
     type Error = InvalidProcessedAgentDataError;
 
     fn try_from(value: proto::ProcessedAgentData) -> Result<Self, Self::Error> {
+        let road_state = value.road_state().into();
         let agent_data = value
             .agent
             .ok_or(InvalidProcessedAgentDataError::MissingAgentData)?;
         let agent_data = Agent::try_from(agent_data)?;
-        // let road_state = value.road_state.ok_or(InvalidProcessedAgentDataError::InvalidRoadState)?;
-        Ok(Self::new(agent_data, value.road_state))
+        Ok(Self::new(agent_data, road_state))
     }
 }
 
@@ -277,8 +306,6 @@ pub enum InvalidProcessedAgentDataError {
         #[source]
         InvalidAgentDataError,
     ),
-    // #[error("Invalid road state")]
-    // InvalidRoadState,
 }
 
 #[cfg(feature = "tonic")]
@@ -300,7 +327,7 @@ impl From<ProcessedAgent> for proto::ProcessedAgentData {
     fn from(value: ProcessedAgent) -> Self {
         Self {
             agent: Some(value.agent_data.into()),
-            road_state: value.road_state,
+            road_state: value.road_state as i32,
         }
     }
 }

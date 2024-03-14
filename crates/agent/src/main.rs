@@ -3,7 +3,6 @@ use std::time::Duration;
 use color_eyre::Result;
 use iot_system::{config::TryRead, domain::Agent, reclone, setup_tracing};
 use mqtt::{AsyncClient, ConnectOptionsBuilder};
-use paho_mqtt as mqtt;
 use tracing::instrument;
 
 use crate::{

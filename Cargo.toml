@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["crates/*"]
-exclude = ["crates/edge", "crates/ui"] # unexclude when ready
+exclude = ["crates/ui"] # unexclude when ready
 
 [workspace.package]
 version = "0.1.0"
@@ -26,6 +26,7 @@ sqlx = ["dep:sqlx"]
 utoipa = ["dep:utoipa", "dep:serde_json"]
 redis = ["dep:redis"]
 tonic = ["dep:tonic", "dep:prost"]
+mqtt = ["dep:mqtt"]
 
 [workspace.dependencies]
 actix-web = "4.5.1"
@@ -36,7 +37,7 @@ chrono = { version = "0.4.34", default-features = false, features = [
 color-eyre = "0.6.2"
 config = { version = "0.14.0", default-features = false, features = ["toml"] }
 derive_more = "0.99.17"
-paho-mqtt = "0.12.3"
+mqtt = { package = "paho-mqtt", version = "0.12.3" }
 prost = "0.12.3"
 prost-types = "0.12.3"
 redis = { version = "0.25.0", features = ["aio", "tokio-rustls-comp"] }
@@ -64,6 +65,7 @@ utoipa = { version = "4.2.0", features = ["openapi_extensions", "chrono", "non_s
 [dependencies]
 chrono.workspace = true
 config.workspace = true
+mqtt = { workspace = true, optional = true }
 prost = { workspace = true, optional = true }
 serde.workspace = true
 thiserror.workspace = true

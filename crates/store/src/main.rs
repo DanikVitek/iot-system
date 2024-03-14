@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     let openapi = ApiDocs::openapi();
 
     tokio::spawn({
-        let address = config.grpc_server().into();
+        let address = config.grpc_server().try_into()?;
         async move {
             tonic::transport::Server::builder()
                 .add_service(reflection_service)

@@ -10,18 +10,18 @@ use iot_system::{
     reclone, setup_tracing,
 };
 use mqtt::ConnectOptionsBuilder;
-use paho_mqtt as mqtt;
 use redis::Commands;
 use tokio_stream::StreamExt;
 use tonic::transport::Channel;
 use tracing::instrument;
+use iot_system::config::Mqtt;
 
 use crate::config::Configuration;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
-    let _guard = setup_tracing("./log", "lab3.log")?;
+    let _guard = setup_tracing("./logs", "lab3.log")?;
 
     let Configuration {
         store_api: store_api_config,
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     let mqtt_client = connect_mqtt(mqtt_config.clone()).await?;
     let store_api_client = StoreClient::connect(store_api_config).await?;
 
-    let config::Mqtt { topic, .. } = mqtt_config;
+    let Mqtt { topic, .. } = mqtt_config;
     listen_for_topic(mqtt_client, redis_client, store_api_client, batch_size, {
         let t = topic.to_string();
         drop(topic);
@@ -148,7 +148,7 @@ async fn send_data_to_store_api(
 }
 
 #[instrument(skip(config))]
-async fn connect_mqtt(config: config::Mqtt) -> Result<mqtt::AsyncClient> {
+async fn connect_mqtt(config: Mqtt) -> Result<mqtt::AsyncClient> {
     let client = mqtt::AsyncClient::new(&config)?;
 
     client
@@ -159,16 +159,16 @@ async fn connect_mqtt(config: config::Mqtt) -> Result<mqtt::AsyncClient> {
                 move |_, _| {
                     tracing::info!(
                         "Connected to the broker ({}:{})",
-                        config.host(),
-                        config.host()
+                        config.broker_host(),
+                        config.broker_port()
                     );
                 }
             },
             move |_, _, rc| {
                 tracing::info!(
                     "Failed to connect to the broker ({}:{}), return code {rc}",
-                    config.host(),
-                    config.port()
+                    config.broker_host(),
+                    config.broker_port()
                 );
             },
         )

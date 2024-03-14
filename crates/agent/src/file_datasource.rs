@@ -1,14 +1,14 @@
-use std::{borrow::Cow, fs::File, io::BufReader};
+use std::borrow::Cow;
+#[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
+use std::{fs::File, io::BufReader};
 
 use chrono::Utc;
-use color_eyre::{
-    eyre::{bail, OptionExt},
-    Result,
-};
-use iot_system::{
-    domain::{Accelerometer, Agent, Gps},
-    KtConvenience,
-};
+#[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
+use color_eyre::OptionExt;
+use color_eyre::{eyre::bail, Result};
+#[cfg(all(not(feature = "async-read"), feature = "sync-read"))]
+use iot_system::domain::{Accelerometer, Gps};
+use iot_system::{domain::Agent, KtConvenience};
 #[cfg(all(feature = "async-read", not(feature = "sync-read")))]
 use tokio::{fs::File as AsyncFile, io::BufReader as AsyncBufReader};
 #[cfg(all(feature = "async-read", not(feature = "sync-read")))]
@@ -163,9 +163,7 @@ impl FileDatasource<state::Reading> {
                 });
 
             return match accelerometer.zip(gps) {
-                Some((accelerometer, gps)) => {
-                    Ok(Agent::new(accelerometer, gps, Utc::now()))
-                }
+                Some((accelerometer, gps)) => Ok(Agent::new(accelerometer, gps, Utc::now())),
                 None => {
                     tracing::debug!("Seeking to the beginning of the files");
                     if accelerometer_reader_start.is_none() || gps_reader_start.is_none() {
@@ -258,6 +256,7 @@ impl FileDatasource<state::Reading> {
         }
     }
 
+    #[allow(unused)]
     pub fn stop_reading(self) -> FileDatasource<state::New> {
         FileDatasource::_new(self.accelerometer_filename, self.gps_filename)
     }

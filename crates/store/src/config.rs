@@ -1,5 +1,4 @@
-use std::net::{IpAddr, SocketAddr, ToSocketAddrs};
-
+use iot_system::config::Server;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 use sqlx::postgres::PgConnectOptions;
@@ -21,23 +20,17 @@ pub struct Database {
     name: SecretString,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize)]
-pub struct Server {
-    host: IpAddr,
-    port: u16,
-}
-
 impl Configuration {
     pub fn database(&self) -> &Database {
         &self.database
     }
 
-    pub fn http_server(&self) -> Server {
-        self.http_server
+    pub fn http_server(&self) -> &Server {
+        &self.http_server
     }
 
-    pub fn grpc_server(&self) -> Server {
-        self.grpc_server
+    pub fn grpc_server(&self) -> &Server {
+        &self.grpc_server
     }
 }
 
@@ -51,19 +44,5 @@ impl Database {
             .username(self.username.expose_secret())
             .password(self.password.expose_secret())
             .database(self.name.expose_secret())
-    }
-}
-
-impl From<Server> for SocketAddr {
-    fn from(value: Server) -> Self {
-        SocketAddr::new(value.host, value.port)
-    }
-}
-
-impl ToSocketAddrs for Server {
-    type Iter = <SocketAddr as ToSocketAddrs>::Iter;
-
-    fn to_socket_addrs(&self) -> std::io::Result<Self::Iter> {
-        SocketAddr::from(*self).to_socket_addrs()
     }
 }

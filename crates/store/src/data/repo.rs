@@ -1,6 +1,6 @@
 use std::num::{NonZeroU32, NonZeroU8};
 
-use iot_system::domain::{Latitude, Longitude};
+use iot_system::domain::{Latitude, Longitude, RoadState};
 use sqlx::PgPool;
 
 use super::{ProcessedAgent, ProcessedAgentDao, ProcessedAgentId, ProcessedAgentWithId};
@@ -19,7 +19,7 @@ pub async fn insert_processed_agent_data_list(
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id as "id!: ProcessedAgentId"
             "#,
-            agent.road_state(),
+            agent.road_state() as RoadState,
             agent.agent_data().accelerometer().x(),
             agent.agent_data().accelerometer().y(),
             agent.agent_data().accelerometer().z(),
@@ -47,7 +47,7 @@ pub async fn insert_processed_agent_data(
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id as "id!: ProcessedAgentId"
         "#,
-        agent.road_state(),
+        agent.road_state() as RoadState,
         agent.agent_data().accelerometer().x(),
         agent.agent_data().accelerometer().y(),
         agent.agent_data().accelerometer().z(),
@@ -70,7 +70,7 @@ pub async fn select_processed_agent_data(
         r#"
         SELECT
             NULL as "id?: ProcessedAgentId",
-            road_state,
+            road_state as "road_state!: RoadState",
             x, y, z,
             latitude as "latitude!: Latitude",
             longitude as "longitude!: Longitude",
@@ -98,7 +98,7 @@ pub async fn select_processed_agent_data_list(
         r#"
         SELECT
             id as "id!: ProcessedAgentId",
-            road_state,
+            road_state as "road_state!: RoadState",
             x, y, z,
             latitude as "latitude!: Latitude",
             longitude as "longitude!: Longitude",
@@ -127,7 +127,7 @@ pub async fn update_processed_agent_data(
         SET road_state = $1, x = $2, y = $3, z = $4, latitude = $5, longitude = $6, timestamp = $7
         WHERE id = $8
         "#,
-        data.road_state(),
+        data.road_state() as RoadState,
         data.agent_data().accelerometer().x(),
         data.agent_data().accelerometer().y(),
         data.agent_data().accelerometer().z(),

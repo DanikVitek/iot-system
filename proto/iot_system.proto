@@ -16,7 +16,12 @@ message ProcessedAgentDataID {
 
 message ProcessedAgentData {
   AgentData agent = 1;
-  string road_state = 2;
+  RoadState road_state = 2;
+}
+
+enum RoadState {
+  SMOOTH = 0;
+  ROUGH = 1;
 }
 
 message AgentData {

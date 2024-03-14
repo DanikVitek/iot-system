@@ -1,0 +1,8 @@
+[store_api]
+port = 50051
+
+[hub_mqtt]
+port = 1883
+
+[mqtt]
+port = 1883

@@ -5,6 +5,7 @@ use derive_more::Into;
 pub use iot_system::domain::{Accelerometer, Agent, Gps, Latitude, Longitude, ProcessedAgent};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToResponse, ToSchema};
+use iot_system::domain::RoadState;
 
 #[derive(
     Debug,
@@ -54,7 +55,7 @@ impl Dto for [ProcessedAgent] {
 pub struct ProcessedAgentDao {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) id: Option<ProcessedAgentId>,
-    pub(super) road_state: String,
+    pub(super) road_state: RoadState,
     pub(super) x: f64,
     pub(super) y: f64,
     pub(super) z: f64,
@@ -74,7 +75,7 @@ impl From<ProcessedAgentWithId> for ProcessedAgentDao {
     fn from(agent: ProcessedAgentWithId) -> Self {
         Self {
             id: agent.id,
-            road_state: agent.data.road_state().to_owned(),
+            road_state: agent.data.road_state(),
             x: agent.data.agent_data().accelerometer().x(),
             y: agent.data.agent_data().accelerometer().y(),
             z: agent.data.agent_data().accelerometer().z(),

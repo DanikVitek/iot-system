@@ -1,17 +1,13 @@
 [package]
-name = "hub"
+name = "edge"
 version.workspace = true
 edition.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-iot-system = { path = "../..", features = ["redis", "tonic", "mqtt"] }
-#actix-web.workspace = true
+iot-system = { path = "../..", features = ["tonic"] }
 chrono.workspace = true
 color-eyre.workspace = true
 mqtt.workspace = true
-redis = { workspace = true, features = ["json"] }
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
