@@ -1,5 +1,5 @@
-[store_api]
-host = "store"
+[hub_grpc]
+host = "hub"
 
 [hub_mqtt]
 host = "mqtt"

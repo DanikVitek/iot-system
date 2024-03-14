@@ -33,6 +33,7 @@ impl Server {
     }
 }
 
+#[cfg(feature = "mqtt")]
 impl Mqtt {
     pub fn broker_host(&self) -> Arc<str> {
         self.server.host()

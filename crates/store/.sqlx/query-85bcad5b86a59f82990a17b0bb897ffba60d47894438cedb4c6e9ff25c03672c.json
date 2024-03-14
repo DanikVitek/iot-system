@@ -6,12 +6,22 @@
       {
         "ordinal": 0,
         "name": "id!: ProcessedAgentId",
-        "type_info": "Int4"
+        "type_info": "Int8"
       }
     ],
     "parameters": {
       "Left": [
-        "Varchar",
+        {
+          "Custom": {
+            "name": "road_state",
+            "kind": {
+              "Enum": [
+                "Smooth",
+                "Rough"
+              ]
+            }
+          }
+        },
         "Float8",
         "Float8",
         "Float8",

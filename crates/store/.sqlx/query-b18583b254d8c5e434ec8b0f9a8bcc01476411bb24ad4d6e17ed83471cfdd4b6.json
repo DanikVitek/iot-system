@@ -5,14 +5,24 @@
     "columns": [],
     "parameters": {
       "Left": [
-        "Varchar",
+        {
+          "Custom": {
+            "name": "road_state",
+            "kind": {
+              "Enum": [
+                "Smooth",
+                "Rough"
+              ]
+            }
+          }
+        },
         "Float8",
         "Float8",
         "Float8",
         "Float8",
         "Float8",
         "Timestamptz",
-        "Int4"
+        "Int8"
       ]
     },
     "nullable": []

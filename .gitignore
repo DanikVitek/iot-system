@@ -7,3 +7,4 @@
 /docker/agent/logs
 /docker/store/logs
 /docker/hub/logs
+/docker/edge/logs

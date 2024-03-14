@@ -56,7 +56,7 @@ pub struct ProcessedAgent {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(ToResponse, ToSchema))]
-#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type), sqlx(type_name = "ROAD_STATE"))]
 #[serde(rename_all = "UPPERCASE")]
 pub enum RoadState {
     #[default]

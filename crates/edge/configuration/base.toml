@@ -1,4 +1,4 @@
-[store_api]
+[hub_grpc]
 port = 50051
 
 [hub_mqtt]

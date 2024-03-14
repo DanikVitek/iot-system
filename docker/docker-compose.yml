@@ -12,7 +12,7 @@ services:
       - "1883:1883"
       - "9001:9001"
     networks:
-      mqtt_network:
+      mqtt:
 
   agent:
     container_name: agent
@@ -28,7 +28,7 @@ services:
       RUST_BACKTRACE: full
       RUST_LOG: DEBUG
     networks:
-      mqtt_network:
+      mqtt:
 
   postgres_db:
     image: postgres:latest
@@ -79,6 +79,7 @@ services:
     networks:
       db_network:
       hub_store:
+      hub:
 
   redis:
     image: redis:latest
@@ -97,21 +98,39 @@ services:
       - mqtt
       - redis
       - store
-#    ports:
-#      - "9000:8000"
     volumes:
       - ./hub/logs:/app/logs
       - ../crates/hub/configuration:/app/configuration
     networks:
-      mqtt_network:
+      mqtt:
       hub_store:
       hub_redis:
 
+  edge:
+    container_name: edge
+    build:
+      context: ..
+      dockerfile: crates/edge/Dockerfile
+    environment:
+      RUST_BACKTRACE: 1
+      RUST_LOG: DEBUG
+    depends_on:
+      - mqtt
+      - hub
+    volumes:
+      - ./edge/logs:/app/logs
+      - ../crates/edge/configuration:/app/configuration
+    networks:
+      mqtt:
+      edge_hub:
+
 networks:
-  mqtt_network:
+  mqtt:
   db_network:
+  hub:
   hub_store:
   hub_redis:
+  edge_hub:
 
 volumes:
   postgres_data:

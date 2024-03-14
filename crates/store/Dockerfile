@@ -1,7 +1,7 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1.76.0 as chef
 WORKDIR /app
 RUN apt update && apt upgrade -y &&\
-    apt install lld clang protobuf-compiler libprotobuf-dev -y
+    apt install lld clang openssl libssl-dev cmake protobuf-compiler libprotobuf-dev -y
 
 FROM chef as planner
 COPY . .

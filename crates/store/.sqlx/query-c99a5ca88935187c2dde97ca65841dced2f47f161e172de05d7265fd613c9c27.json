@@ -1,0 +1,74 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            NULL as \"id?: ProcessedAgentId\",\n            road_state as \"road_state!: RoadState\",\n            x, y, z,\n            latitude as \"latitude!: Latitude\",\n            longitude as \"longitude!: Longitude\",\n            timestamp\n        FROM processed_agent_data\n        WHERE id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id?: ProcessedAgentId",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "road_state!: RoadState",
+        "type_info": {
+          "Custom": {
+            "name": "road_state",
+            "kind": {
+              "Enum": [
+                "Smooth",
+                "Rough"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "x",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "y",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "z",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "latitude!: Latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "longitude!: Longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "timestamp",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c99a5ca88935187c2dde97ca65841dced2f47f161e172de05d7265fd613c9c27"
+}

@@ -1,5 +1,6 @@
 use iot_system::domain::{Agent, ProcessedAgent, RoadState};
 
+#[tracing::instrument]
 pub fn process_agent_data(current_data: Agent, prev_data: Option<&Agent>) -> ProcessedAgent {
     let road_state = 'b: {
         let Some(prev_data) = prev_data else {
@@ -12,6 +13,7 @@ pub fn process_agent_data(current_data: Agent, prev_data: Option<&Agent>) -> Pro
         let a1_z = prev_data.accelerometer().z(); // mm/s^2
         let a2_z = current_data.accelerometer().z(); // mm/s^2
         let dv_z = (a1_z + a2_z) / 2.0 * dt; // mm/s
+        tracing::debug!("dv_z: {}", dv_z);
         if dv_z.abs() > 100.0 {
             RoadState::Rough
         } else {
