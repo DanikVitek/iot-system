@@ -1,9 +1,11 @@
 use core::fmt;
 use std::{
-    net::{Ipv6Addr, SocketAddr, ToSocketAddrs},
+    net::{SocketAddr, ToSocketAddrs},
     str::FromStr,
     sync::Arc,
 };
+#[cfg(feature = "tonic")]
+use std::net::Ipv6Addr;
 
 #[cfg(feature = "redis")]
 use redis::{ConnectionInfo, IntoConnectionInfo, RedisResult};
