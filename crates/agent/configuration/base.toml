@@ -1,1 +1,4 @@
 delay = 1
+
+[mqtt]
+port = 1883

@@ -1,22 +1,20 @@
-mod config;
-
 use std::num::NonZeroUsize;
 
 use color_eyre::Result;
 use iot_system::{
-    config::TryRead,
+    config::{Mqtt, TryRead},
     domain::ProcessedAgent,
     proto::{self, store_client::StoreClient},
-    reclone, setup_tracing,
+    setup_tracing,
 };
-use mqtt::ConnectOptionsBuilder;
 use redis::Commands;
 use tokio_stream::StreamExt;
 use tonic::transport::Channel;
 use tracing::instrument;
-use iot_system::config::Mqtt;
 
 use crate::config::Configuration;
+
+mod config;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -31,7 +29,7 @@ async fn main() -> Result<()> {
     } = Configuration::try_read()?;
 
     let redis_client = redis::Client::open(redis_config)?;
-    let mqtt_client = connect_mqtt(mqtt_config.clone()).await?;
+    let mqtt_client = iot_system::mqtt::connect(mqtt_config.clone()).await?;
     let store_api_client = StoreClient::connect(store_api_config).await?;
 
     let Mqtt { topic, .. } = mqtt_config;
@@ -145,34 +143,4 @@ async fn send_data_to_store_api(
         };
         tracing::info!("Data sent to the store API. Response: {ids:?}");
     }
-}
-
-#[instrument(skip(config))]
-async fn connect_mqtt(config: Mqtt) -> Result<mqtt::AsyncClient> {
-    let client = mqtt::AsyncClient::new(&config)?;
-
-    client
-        .connect_with_callbacks(
-            ConnectOptionsBuilder::new().finalize(),
-            {
-                reclone!(config);
-                move |_, _| {
-                    tracing::info!(
-                        "Connected to the broker ({}:{})",
-                        config.broker_host(),
-                        config.broker_port()
-                    );
-                }
-            },
-            move |_, _, rc| {
-                tracing::info!(
-                    "Failed to connect to the broker ({}:{}), return code {rc}",
-                    config.broker_host(),
-                    config.broker_port()
-                );
-            },
-        )
-        .await?;
-
-    Ok(client)
 }

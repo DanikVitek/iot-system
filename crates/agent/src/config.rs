@@ -1,18 +1,12 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
+use iot_system::config::Mqtt;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Configuration {
     mqtt: Mqtt,
     delay: f64,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct Mqtt {
-    broker_host: Arc<str>,
-    broker_port: u16,
-    topic: Arc<str>,
 }
 
 impl Configuration {
@@ -26,21 +20,3 @@ impl Configuration {
 }
 
 impl iot_system::config::TryRead<'_> for Configuration {}
-
-impl Mqtt {
-    pub fn broker_host(&self) -> &str {
-        &self.broker_host
-    }
-
-    pub fn broker_port(&self) -> u16 {
-        self.broker_port
-    }
-
-    pub fn topic(&self) -> &str {
-        &self.topic
-    }
-
-    pub fn broker_address(&self) -> String {
-        format!("tcp://{}:{}", self.broker_host, self.broker_port)
-    }
-}

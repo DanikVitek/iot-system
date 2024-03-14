@@ -24,8 +24,8 @@ pub struct Mqtt {
 }
 
 impl Server {
-    pub fn host(&self) -> &str {
-        &self.host
+    pub fn host(&self) -> Arc<str> {
+        Arc::clone(&self.host)
     }
 
     pub fn port(&self) -> u16 {
@@ -34,16 +34,16 @@ impl Server {
 }
 
 impl Mqtt {
-    pub fn broker_host(&self) -> &str {
-        &self.server.host
+    pub fn broker_host(&self) -> Arc<str> {
+        self.server.host()
     }
 
     pub fn broker_port(&self) -> u16 {
         self.server.port
     }
 
-    pub fn topic(&self) -> &str {
-        &self.topic
+    pub fn topic(&self) -> Arc<str> {
+        Arc::clone(&self.topic)
     }
 
     pub fn broker_address(&self) -> String {

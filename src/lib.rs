@@ -9,6 +9,8 @@ use tracing_subscriber::{
 
 pub mod config;
 pub mod domain;
+#[cfg(feature = "mqtt")]
+pub mod mqtt;
 
 #[cfg(feature = "tonic")]
 pub mod proto {

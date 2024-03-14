@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use color_eyre::Result;
-use iot_system::{config::TryRead, domain::Agent, reclone, setup_tracing};
-use mqtt::{AsyncClient, ConnectOptionsBuilder};
+use iot_system::{config::TryRead, domain::Agent, setup_tracing};
+use mqtt::AsyncClient;
 use tracing::instrument;
 
 use crate::{
@@ -19,10 +19,10 @@ async fn main() -> Result<()> {
     let _guard = setup_tracing("./logs", "lab1.log")?;
 
     let config = Configuration::try_read()?;
-    let client = connect_mqtt(config.mqtt().to_owned()).await?;
+    let client = iot_system::mqtt::connect(config.mqtt().to_owned()).await?;
 
     let datasource = FileDatasource::new("./data/accelerometer.csv", "./data/gps.csv");
-    let result = publish(client, config.mqtt().topic(), datasource, config.delay()).await;
+    let result = publish(client, &config.mqtt().topic(), datasource, config.delay()).await;
 
     result.map_err(Into::into)
 }
@@ -126,34 +126,4 @@ async fn read_data(
             tracing::error!("Failed to send data to the receiver: {}", err);
         }
     }
-}
-
-#[instrument(skip(config))]
-async fn connect_mqtt(config: config::Mqtt) -> Result<AsyncClient> {
-    let client = mqtt::AsyncClient::new(config.broker_address())?;
-
-    client
-        .connect_with_callbacks(
-            ConnectOptionsBuilder::new().finalize(),
-            {
-                reclone!(config);
-                move |_, _| {
-                    tracing::info!(
-                        "Connected to the broker ({}:{})",
-                        config.broker_host(),
-                        config.broker_port()
-                    );
-                }
-            },
-            move |_, _, rc| {
-                tracing::info!(
-                    "Failed to connect to the broker ({}:{}), return code {rc}",
-                    config.broker_host(),
-                    config.broker_port()
-                );
-            },
-        )
-        .await?;
-
-    Ok(client)
 }
